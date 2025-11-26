@@ -260,15 +260,13 @@ type Config struct {
 	// Default hasher is github.com/cespare/xxhash/v2
 	Hasher hasher.Hasher
 
-	// LogOutput is the writer where logs should be sent. If this is not
-	// set, logging will go to stderr by default. You cannot specify both LogOutput
-	// and Logger at the same time.
+	// LogOutput is the writer where logs should be sent when no custom logger
+	// is provided. If unset, stderr is used by default.
+	// If Logger is set, LogOutput is ignored.
 	LogOutput io.Writer
 
-	// Logger is a custom logger which you provide. If Logger is set, it will use
-	// this for the internal logger. If Logger is not set, it will fall back to the
-	// behavior for using LogOutput. You cannot specify both LogOutput and Logger
-	// at the same time.
+	// Logger is a user-provided custom logger. When this is set, Olric will use
+	// it as-is and will not inspect or modify LogOutput.
 	Logger *log.Logger
 
 	// DMaps denotes a global configuration for DMaps. You can still overwrite it
@@ -406,8 +404,6 @@ func (c *Config) Sanitize() error {
 
 	if c.Logger == nil {
 		c.Logger = log.New(c.LogOutput, "", log.LstdFlags)
-	} else {
-		c.Logger.SetOutput(c.LogOutput)
 	}
 
 	if c.Hasher == nil {
